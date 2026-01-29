@@ -1,0 +1,688 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>给吴潇静的小信件</title>
+<style>
+  :root {
+    --bg: #f7efe7;
+    --card: #fff8f1;
+    --accent: #d74c4c;
+    --text: #2f2a28;
+    --shadow: 0 18px 45px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at 20% 20%, #fff7ee, #f1e3d8 45%, #e9d7c7 90%);
+    color: var(--text);
+  }
+  .card {
+    width: min(420px, 90vw); padding: 28px; border-radius: 18px;
+    background: var(--card); box-shadow: var(--shadow);
+    transition: transform .3s ease;
+  }
+  .card:hover { transform: translateY(-4px); }
+  h1 { margin: 0 0 12px; font-weight: 700; letter-spacing: .02em; }
+  label { display: block; margin: 12px 0 6px; font-size: 14px; }
+  input {
+    width: 100%; padding: 12px 14px; border-radius: 12px;
+    border: 1px solid #d6c7bc; background: #fff;
+    font-size: 15px; outline: none; transition: border .2s;
+  }
+  input:focus { border-color: var(--accent); }
+  button {
+    width: 100%; margin-top: 16px; padding: 12px;
+    border: none; border-radius: 12px; background: var(--accent);
+    color: #fff; font-size: 16px; cursor: pointer;
+    box-shadow: 0 10px 25px rgba(215,76,76,0.25);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  button:active { transform: scale(0.98); box-shadow: 0 6px 18px rgba(215,76,76,0.25); }
+  .hint { margin-top: 10px; font-size: 13px; color: #8a7c71; text-align: center; }
+  .error { color: #c0392b; font-size: 13px; margin-top: 8px; min-height: 18px; }
+
+  .envelope-scene { display: none; }
+  .envelope-wrap { position: relative; width: min(420px, 90vw); height: 280px; }
+  .envelope {
+    position: absolute; inset: 0; background: #f6e7d7; border: 1px solid #e0d0c0;
+    border-radius: 18px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .flap {
+    position: absolute; inset: 0; background: linear-gradient(135deg, #fcebd9, #f4ddc8);
+    clip-path: polygon(0 0, 100% 0, 50% 55%);
+    transform-origin: top; transition: transform 0.9s ease, box-shadow 0.9s ease;
+    z-index: 2;
+  }
+  .body {
+    position: absolute; inset: 0; background: linear-gradient(180deg, #f5ddc6, #f0d2b8);
+  }
+  .seal {
+    position: absolute; left: 50%; top: 48%; transform: translate(-50%, -50%);
+    width: 74px; height: 74px; border-radius: 50%; background: var(--accent);
+    color: #fff; display: grid; place-items: center; font-weight: 700;
+    letter-spacing: .04em; cursor: pointer; z-index: 3;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+    transition: transform .15s ease;
+  }
+  .seal:active { transform: translate(-50%,-50%) scale(0.97); }
+  .letter {
+    position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+    width: 92%; height: 78%; background: #fffaf4; border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.12); padding: 18px;
+    opacity: 0; transition: opacity 0.7s ease 0.4s, transform 0.7s ease 0.4s;
+    transform: translate(-50%, 16px);
+  }
+  .letter h2 { margin: 0 0 10px; font-size: 20px; }
+  .letter p { margin: 6px 0; line-height: 1.6; }
+  .envelope.open .flap { transform: rotateX(-160deg); box-shadow: 0 16px 28px rgba(0,0,0,0.16); }
+  .envelope.open .letter { opacity: 1; transform: translate(-50%, 0); }
+
+  .btn-inline {
+    width: auto; padding: 8px 12px; font-size: 13px; margin-top: 0;
+    border-radius: 10px;
+  }
+  .add-track { margin-top: 12px; }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .small { font-size: 12px; color: #8a7c71; margin-top: 6px; }
+  .note { margin-top: 10px; }
+
+  .admin-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center; z-index: 999;
+  }
+  .admin-panel {
+    width: min(480px, 92vw); padding: 20px; border-radius: 16px;
+    background: #fff8f1; box-shadow: var(--shadow);
+  }
+  .admin-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .admin-title { font-weight: 700; margin-bottom: 8px; }
+
+  .fireworks-stage {
+    position: fixed; inset: 0; background: #000; display: none; z-index: 1000;
+  }
+  #fireworks-canvas { width: 100%; height: 100%; display: block; }
+
+  .final-page {
+    position: fixed; inset: 0; background: #000;
+    display: none; align-items: center; justify-content: center; text-align: center;
+    font-family: "Courier New", monospace; padding: 0; overflow: hidden;
+  }
+  #final-canvas { width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+  <div class="card" id="login-card">
+    <h1>给吴潇静的信</h1>
+    <label>用户名</label>
+    <input id="user" autocomplete="off" />
+    <label>密码</label>
+    <input id="pass" type="password" />
+    <button id="login-btn">推开小门</button>
+    <div class="error" id="err"></div>
+    <div class="hint">小提示：用户名是你的名字，密码是你的生日~</div>
+  </div>
+
+  <div class="envelope-scene" id="scene">
+    <div class="envelope-wrap">
+      <div class="envelope" id="envelope">
+        <div class="flap"></div>
+        <div class="body"></div>
+        <div class="seal" id="seal">💌</div>
+        <div class="letter" id="letter">
+          <h2>Dear 吴潇静</h2>
+          <p>谢谢你出现在我的世界里。</p>
+          <p>信封里的动画稍后揭晓，敬请期待。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="bg-audio" preload="none" style="display: none;"></audio>
+
+  <div class="admin-overlay" id="admin-overlay">
+    <div class="admin-panel">
+      <div class="admin-title">后台添加（隐藏）</div>
+      <div class="add-track">
+        <label class="small">从链接添加（可保存）</label>
+        <div class="admin-row">
+          <input id="admin-url-input" placeholder="https://...mp3" />
+          <button id="admin-add-url-btn" class="btn-inline" type="button">添加</button>
+        </div>
+      </div>
+      <div class="add-track">
+        <label class="small">从本地添加 MP3/音频（当前设备）</label>
+        <input type="file" id="admin-file-input" accept="audio/*" multiple />
+      </div>
+      <div class="small note">快捷键：Ctrl+Shift+A 打开/关闭后台窗口。</div>
+      <button id="admin-close" class="btn-inline" type="button">关闭</button>
+    </div>
+  </div>
+
+  <div class="fireworks-stage" id="fireworks-stage">
+    <canvas id="fireworks-canvas"></canvas>
+  </div>
+
+  <div class="final-page" id="final-page">
+    <canvas id="final-canvas"></canvas>
+  </div>
+
+<script>
+  const loginCard = document.getElementById('login-card');
+  const scene = document.getElementById('scene');
+  const err = document.getElementById('err');
+  const audio = document.getElementById('bg-audio');
+  const adminOverlay = document.getElementById('admin-overlay');
+  const adminUrlInput = document.getElementById('admin-url-input');
+  const adminAddUrlBtn = document.getElementById('admin-add-url-btn');
+  const adminFileInput = document.getElementById('admin-file-input');
+  const adminClose = document.getElementById('admin-close');
+  const fireworksStage = document.getElementById('fireworks-stage');
+  const fireworksCanvas = document.getElementById('fireworks-canvas');
+  const finalPage = document.getElementById('final-page');
+
+  const urlStoreKey = 'bg_playlist_urls_v1';
+  const tracks = [];
+  let fireworksRunning = false;
+  let boomCtx;
+
+  document.getElementById('login-btn').onclick = () => {
+    const u = document.getElementById('user').value.trim();
+    const p = document.getElementById('pass').value.trim();
+    if (u === '吴潇静' && p === '20040130') {
+      loginCard.style.display = 'none';
+      scene.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      err.textContent = '用户名或密码不对，再试一次~';
+    }
+  };
+
+  document.getElementById('seal').onclick = () => {
+    const env = document.getElementById('envelope');
+    if (!env.classList.contains('open')) {
+      env.classList.add('open');
+      runSurpriseAnimation();
+      playFirstTrack();
+    }
+  };
+
+  function runSurpriseAnimation() {
+    if (fireworksRunning) return;
+    fireworksRunning = true;
+    adminOverlay.style.display = 'none';
+    fireworksStage.style.display = 'block';
+    startFireworksShow(20000);
+  }
+
+  function playFirstTrack() {
+    if (!tracks.length) return;
+    if (audio.src) return;
+    audio.src = tracks[0].url;
+    audio.play().catch(() => {});
+  }
+
+  function addFileTracks(fileList) {
+    Array.from(fileList).forEach((file) => {
+      const url = URL.createObjectURL(file);
+      tracks.push({
+        id: crypto.randomUUID(),
+        type: 'file',
+        name: file.name,
+        url,
+      });
+    });
+    playFirstTrack();
+  }
+
+  function addUrlTrackFromAdmin() {
+    const url = adminUrlInput.value.trim();
+    if (!url) return;
+    let name = url.split('/').pop() || url;
+    if (name.length > 40) name = name.slice(0, 37) + '...';
+    tracks.push({
+      id: crypto.randomUUID(),
+      type: 'url',
+      name,
+      url,
+    });
+    adminUrlInput.value = '';
+    persistUrlTracks();
+    playFirstTrack();
+  }
+
+  function persistUrlTracks() {
+    const saved = tracks
+      .filter((t) => t.type === 'url')
+      .map(({ name, url }) => ({ name, url }));
+    localStorage.setItem(urlStoreKey, JSON.stringify(saved));
+  }
+
+  function loadUrlTracks() {
+    try {
+      const raw = localStorage.getItem(urlStoreKey);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      saved.forEach((t) => {
+        tracks.push({
+          id: crypto.randomUUID(),
+          type: 'url',
+          name: t.name || t.url,
+          url: t.url,
+        });
+      });
+    } catch {
+      // Ignore corrupted storage
+    }
+  }
+
+  adminAddUrlBtn.addEventListener('click', addUrlTrackFromAdmin);
+  adminFileInput.addEventListener('change', (e) => {
+    addFileTracks(e.target.files);
+  });
+  adminClose.addEventListener('click', () => { adminOverlay.style.display = 'none'; });
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+      adminOverlay.style.display = adminOverlay.style.display === 'flex' ? 'none' : 'flex';
+      if (adminOverlay.style.display === 'flex') adminOverlay.style.alignItems = 'center';
+    }
+  });
+  loadUrlTracks();
+
+  function playBoom() {
+    try {
+      if (!boomCtx) {
+        boomCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      const ctx = boomCtx;
+      const duration = 0.35;
+      const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        const t = i / data.length;
+        const env = Math.pow(1 - t, 3);
+        data[i] = (Math.random() * 2 - 1) * env;
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 180;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.22, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      src.start();
+    } catch {
+      // Ignore audio errors
+    }
+  }
+  function startFinalFirework() {
+    const canvas = document.getElementById('final-canvas');
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+
+    const rocket = { x: w * 0.5, y: h + 10, vy: -5.0, targetY: h * 0.38 };
+    const burst = [];
+    let exploded = false;
+    let textTime = 0;
+    let lastTime = performance.now();
+
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+
+    function explode() {
+      const count = 160;
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count;
+        const speed = 1.6 + Math.random() * 0.9;
+        burst.push({
+          x: rocket.x,
+          y: rocket.y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1,
+          digit: i % 2 === 0 ? '0' : '1',
+          size: 16 + Math.random() * 10,
+        });
+      }
+    }
+
+    function drawText(dt) {
+      textTime += dt;
+      const t = Math.min(textTime / 2200, 1);
+      const scale = 0.6 + t * 0.7;
+      const alpha = Math.min(0.2 + t * 0.8, 1);
+      ctx.save();
+      ctx.translate(w * 0.5, h * 0.52);
+      ctx.scale(scale, scale);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#ff5a7a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '64px "SimSun", "Songti SC", serif';
+      ctx.fillText('爱你宝宝', 0, -24);
+      ctx.fillText('生日快乐', 0, 36);
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+
+    function tick(now) {
+      const dt = now - lastTime;
+      lastTime = now;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, w, h);
+
+      if (!exploded) {
+        rocket.y += rocket.vy;
+        ctx.fillStyle = '#ff5a7a';
+        ctx.font = '18px "Courier New", monospace';
+        ctx.fillText('0', rocket.x, rocket.y);
+        if (rocket.y <= rocket.targetY) {
+          exploded = true;
+          explode();
+        }
+      } else {
+        drawText(dt);
+      }
+
+      burst.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.01;
+        p.life -= 0.02;
+      });
+
+      burst.forEach((p) => {
+        ctx.globalAlpha = Math.max(p.life, 0);
+        ctx.fillStyle = '#ff5a7a';
+        ctx.font = `${p.size}px "Courier New", monospace`;
+        ctx.fillText(p.digit, p.x, p.y);
+      });
+      ctx.globalAlpha = 1;
+
+      const burstAlive = burst.some(p => p.life > 0);
+      if (!exploded || burstAlive || textTime < 2600) {
+        requestAnimationFrame(tick);
+      } else {
+        window.removeEventListener('resize', resize);
+      }
+    }
+
+    requestAnimationFrame(tick);
+  }
+  function startFireworksShow(durationMs) {
+    const ctx = fireworksCanvas.getContext('2d');
+    let w = fireworksCanvas.width = window.innerWidth;
+    let h = fireworksCanvas.height = window.innerHeight;
+    const green = '#00ff66';
+    const palette = {
+      heart: '#ff5a7a',
+      warm: '#ffd34d',
+      cool: '#5ad0ff',
+    };
+    const rockets = [];
+    const particles = [];
+    const lineParticles = [];
+    let lastTime = performance.now();
+    const startTime = performance.now();
+
+    function resize() {
+      w = fireworksCanvas.width = window.innerWidth;
+      h = fireworksCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+
+    function edgeBiasedX() {
+      const r = Math.random();
+      if (r < 0.3) {
+        return w * (0.05 + Math.random() * 0.25);
+      }
+      if (r < 0.6) {
+        return w * (0.7 + Math.random() * 0.25);
+      }
+      return w * (0.3 + Math.random() * 0.4);
+    }
+
+    function launchRocket() {
+      const x = edgeBiasedX();
+      const r = Math.random();
+      let type = 'normal';
+      if (r < 0.3) type = 'heart';
+      else if (r < 0.55) type = 'flower';
+      else if (r < 0.85) type = 'radial';
+      const color = type === 'heart'
+        ? palette.heart
+        : (Math.random() < 0.5 ? palette.warm : palette.cool);
+      rockets.push({
+        x,
+        y: h + 10,
+        vy: -4.5 - Math.random() * 2.5,
+        targetY: h * (0.2 + Math.random() * 0.35),
+        state: 'line',
+        lineLen: 0,
+        lineDigits: Math.random() < 0.5 ? '01010101' : '10101010',
+        lineSize: 12 + Math.random() * 8,
+        type,
+        color,
+      });
+    }
+
+    function explode(rocket) {
+      playBoom();
+      const heart = rocket.type === 'heart';
+      const flower = rocket.type === 'flower';
+      const radial = rocket.type === 'radial';
+      const countBase = heart ? 90 : 110;
+      const count = Math.floor(countBase + Math.random() * 70);
+      const sizeScale = 0.7 + Math.random() * 0.9;
+
+      if (flower) {
+        const layers = 3 + Math.floor(Math.random() * 2);
+        for (let layer = 0; layer < layers; layer++) {
+          const rays = Math.floor(10 + Math.random() * 10) + layer * 2;
+          const layerSpeed = 1.4 + layer * 0.5 + Math.random() * 0.6;
+          const layerSize = 11 + layer * 2 + Math.random() * 6;
+          const layerColor = rocket.color;
+          for (let i = 0; i < rays; i++) {
+            const angle = (Math.PI * 2 * i) / rays;
+            lineParticles.push({
+              x: rocket.x,
+              y: rocket.y,
+              vx: Math.cos(angle) * layerSpeed,
+              vy: Math.sin(angle) * layerSpeed,
+              life: 1,
+              digit: i % 2 === 0 ? '0' : '1',
+              size: layerSize,
+              color: layerColor,
+              trail: [],
+            });
+          }
+        }
+        return;
+      }
+
+      if (radial) {
+        const rays = Math.floor(14 + Math.random() * 12);
+        const radialColor = rocket.color;
+        for (let i = 0; i < rays; i++) {
+          const angle = (Math.PI * 2 * i) / rays;
+          const speed = 1.6 + Math.random() * 0.9;
+          lineParticles.push({
+            x: rocket.x,
+            y: rocket.y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1,
+            digit: i % 2 === 0 ? '0' : '1',
+            size: 12 + Math.random() * 10,
+            color: radialColor,
+            trail: [],
+          });
+        }
+        return;
+      }
+
+      const burstColor = heart ? palette.heart : rocket.color;
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count;
+        let vx = Math.cos(angle);
+        let vy = Math.sin(angle);
+        if (heart) {
+          const t = angle;
+          const hx = 16 * Math.pow(Math.sin(t), 3);
+          const hy = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+          vx = hx / 18;
+          vy = -hy / 18;
+        }
+        const speed = (heart ? 1.7 : 2.1) * (0.45 + Math.random() * 0.55);
+        particles.push({
+          x: rocket.x,
+          y: rocket.y,
+          vx: vx * speed * (0.8 + Math.random() * 0.4),
+          vy: vy * speed * (0.8 + Math.random() * 0.4),
+          life: 1,
+          digit: i % 2 === 0 ? '0' : '1',
+          size: (12 + Math.random() * 14) * sizeScale,
+          color: burstColor,
+        });
+      }
+    }
+
+    function update(dt) {
+      if (Math.random() < 0.055) launchRocket();
+
+      for (let i = rockets.length - 1; i >= 0; i--) {
+        const r = rockets[i];
+        if (r.state === 'line') {
+          r.y += r.vy;
+          r.lineLen = Math.min(r.lineLen + 10, 70);
+          if (r.y <= r.targetY) {
+            r.state = 'point';
+          }
+        } else if (r.state === 'point') {
+          explode(r);
+          rockets.splice(i, 1);
+        }
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.01;
+        p.life -= 0.0055;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      for (let i = lineParticles.length - 1; i >= 0; i--) {
+        const l = lineParticles[i];
+        l.x += l.vx;
+        l.y += l.vy;
+        l.vy += 0.014;
+        l.life -= 0.006;
+        l.trail.push({ x: l.x, y: l.y });
+        if (l.trail.length > 12) l.trail.shift();
+        if (l.life <= 0) lineParticles.splice(i, 1);
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.textBaseline = 'middle';
+      rockets.forEach((r) => {
+        ctx.fillStyle = r.color || green;
+        if (r.state === 'line') {
+          const step = r.lineSize * 1.2;
+          const count = Math.max(1, Math.floor(r.lineLen / step));
+          for (let i = 0; i < count; i++) {
+            const y = r.y + i * step;
+            ctx.font = `${r.lineSize}px "Courier New", monospace`;
+            const ch = r.lineDigits[i % r.lineDigits.length];
+            ctx.fillText(ch, r.x, y);
+          }
+        }
+      });
+
+      particles.forEach((p) => {
+        ctx.globalAlpha = Math.max(p.life, 0);
+        ctx.fillStyle = p.color || green;
+        ctx.font = `${p.size}px "Courier New", monospace`;
+        ctx.fillText(p.digit, p.x, p.y);
+      });
+
+      lineParticles.forEach((l) => {
+        ctx.globalAlpha = Math.max(l.life, 0);
+        ctx.fillStyle = l.color || green;
+        ctx.font = `${l.size}px "Courier New", monospace`;
+        for (let i = 0; i < l.trail.length; i++) {
+          const t = l.trail[i];
+          const fade = (i + 1) / l.trail.length;
+          ctx.globalAlpha = Math.max(l.life * fade, 0);
+          ctx.fillText(l.digit, t.x, t.y);
+        }
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function tick(now) {
+      const dt = now - lastTime;
+      lastTime = now;
+      update(dt);
+      draw();
+
+      if (now - startTime < durationMs) {
+        requestAnimationFrame(tick);
+      } else {
+        window.removeEventListener('resize', resize);
+        fireworksStage.style.display = 'none';
+        scene.style.display = 'none';
+        finalPage.style.display = 'flex';
+        startFinalFirework();
+      }
+    }
+
+    requestAnimationFrame(tick);
+  }
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
